@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
+import { connectDB } from "./config/databse";
 
 dotenv.config();
 
@@ -11,6 +12,10 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 2000;
 
+async function main() {
+  await connectDB();
+}
+
 app
   .listen(PORT, () => {
     console.log(`server is running on ${PORT}`);
@@ -18,3 +23,7 @@ app
   .on("error", (err) => {
     console.error("server startup error", err);
   });
+main().catch((error) => {
+  console.log(error);
+  throw error;
+});

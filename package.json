@@ -17,7 +17,10 @@
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.2",
+    "node-device-detector": "^2.2.4",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
