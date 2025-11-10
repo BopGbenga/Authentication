@@ -3,7 +3,7 @@ import { detector } from "../config/deviceDetector";
 import { User } from "../model/user";
 import passport from "passport";
 
-const login = (req: Request, res: Response, next: NextFunction) => {
+export const login = (req: Request, res: Response, next: NextFunction) => {
   try {
     const userAgent = req.header("x-ota-useragent");
     const ip = req.header("x-ip-address");
