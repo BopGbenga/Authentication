@@ -55,6 +55,16 @@ const userSchema = new mongoose_1.default.Schema({
         type: [String],
         required: true,
     },
+    resetToken: {
+        type: String,
+        default: null,
+        required: false,
+    },
+    resetTokenExpires: {
+        type: Date,
+        default: null,
+        required: false,
+    },
 }, { timestamps: true });
 userSchema.statics.login = function login(email, password) {
     return __awaiter(this, void 0, void 0, function* () {

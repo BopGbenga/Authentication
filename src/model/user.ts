@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrpyt from "bcrypt";
+import { required, string } from "joi";
 
 const userSchema = new mongoose.Schema(
   {
@@ -41,6 +42,16 @@ const userSchema = new mongoose.Schema(
     trustedDevices: {
       type: [String],
       required: true,
+    },
+    resetToken: {
+      type: String,
+      default: null,
+      required: false,
+    },
+    resetTokenExpires: {
+      type: Date,
+      default: null,
+      required: false,
     },
   },
   { timestamps: true }

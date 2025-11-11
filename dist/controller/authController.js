@@ -8,10 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AuthController = void 0;
 const handler_1 = require("../utils/handler");
 const user_1 = require("../model/user");
 const deviceDetector_1 = require("../config/deviceDetector");
+const bcrypt_1 = __importDefault(require("bcrypt"));
 class AuthController {
     static signup(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -123,4 +128,67 @@ class AuthController {
             }
         });
     }
+    static updatePassword(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { token, newPassword } = req.body;
+                if (!token) {
+                    return res.status(400).json({
+                        message: "Reset token is required",
+                        staus: false,
+                    });
+                }
+                if (!newPassword || newPassword.length < 6) {
+                    return res.status(400).json({
+                        message: "password must be 6 charachters long",
+                        status: false,
+                    });
+                }
+                const user = yield user_1.User.findOne({
+                    resetToken: token,
+                    resetTokenExpires: { $gt: new Date() },
+                });
+                if (!user) {
+                    return res.status(400).json({
+                        message: "invalid  or expired token",
+                        Status: false,
+                    });
+                }
+                const salt = yield bcrypt_1.default.genSalt(10);
+                user.password = yield bcrypt_1.default.hash(newPassword, salt);
+                user.resetToken = null;
+                user.resetTokenExpires = null;
+                yield user.save();
+                return res.status(200).json({
+                    message: "password updated successfully",
+                    status: true,
+                });
+            }
+            catch (error) {
+                console.log(error);
+                return res.status(500).json({
+                    message: "internal server error",
+                    status: false,
+                });
+            }
+        });
+    }
+    static changePasswordMail(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email } = req.body;
+                const user = yield user_1.User.findOne({ where: { email } });
+                if (user) {
+                    const randomNumber1 = Math.floor(Math.random() * 10).toString();
+                    const randomNumber4 = Math.floor(Math.random() * 1000)
+                        .toString()
+                        .padStart(4, randomNumber1);
+                }
+                {
+                }
+            }
+            catch (error) { }
+        });
+    }
 }
+exports.AuthController = AuthController;
