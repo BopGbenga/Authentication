@@ -20,7 +20,7 @@ const sendEmailQueue = new bull_1.default("user Verification", {
         host: process.env.REDIS_HOST,
         password: process.env.REDIS_PASSWORD,
         port: Number(process.env.REDIS_PORT),
-        tls: true,
+        tls: {},
     },
     defaultJobOptions: {
         attempts: 3,
@@ -38,13 +38,24 @@ sendEmailQueue.process((job, done) => __awaiter(void 0, void 0, void 0, function
     const { user, agent, date, ip } = job.data;
     try {
         if (!agent) {
-            console.log(`sender user verification mail ${user.email}`);
+            console.log(`sending user verification mail to ${user.email}`);
             yield sendGrid_1.SendGrid.sendVerification(user);
             console.log(`sent user verification mail to ${user.email}`);
         }
         else {
-            console.log(`sending suspiscious login mail to ${user.email}`);
+            console.log(`sending suspicious login mail to ${user.email}`);
+            const { device, os, client } = agent;
+            const deviceObject = {
+                model: device.model || os.name,
+                ip: ip,
+                client: `${client.name} ${client.version}`,
+                date: date,
+            };
         }
+        done();
     }
-    catch (error) { }
+    catch (error) {
+        console.error("Error processing email job:", error);
+        done(error);
+    }
 }));
