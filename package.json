@@ -27,6 +27,7 @@
     "node-device-detector": "^2.2.4",
     "passport": "^0.7.0",
     "redis": "^5.9.0",
+    "ua-parser-js": "^2.0.6",
     "winston": "^3.18.3",
     "winston-daily-rotate-file": "^5.0.0"
   },
