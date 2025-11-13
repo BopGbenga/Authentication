@@ -17,7 +17,6 @@ const sendEmailQueue = new Queue("user Verification", {
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
     port: Number(process.env.REDIS_PORT),
-    tls: {},
   },
   defaultJobOptions: {
     attempts: 3,
@@ -78,7 +77,6 @@ const sendPasswordResetQueue = new Queue("password Reset", {
     host: process.env.REDIS_HOST,
     password: process.env.REDIS_PASSWORD,
     port: Number(process.env.REDIS_PORT),
-    tls: {},
   },
   defaultJobOptions: {
     attempts: 3,

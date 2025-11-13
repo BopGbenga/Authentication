@@ -115,7 +115,6 @@ class AuthController {
                     user.trustedDevices.push(deviceKey);
                     yield user.save();
                 }
-                // generate JWT
                 const token = jsonwebtoken_1.default.sign({
                     id: user.id,
                     email: user.email,

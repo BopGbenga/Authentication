@@ -29,7 +29,6 @@ const sendEmailQueue = new bull_1.default("user Verification", {
         host: process.env.REDIS_HOST,
         password: process.env.REDIS_PASSWORD,
         port: Number(process.env.REDIS_PORT),
-        tls: {},
     },
     defaultJobOptions: {
         attempts: 3,
@@ -89,7 +88,6 @@ const sendPasswordResetQueue = new bull_1.default("password Reset", {
         host: process.env.REDIS_HOST,
         password: process.env.REDIS_PASSWORD,
         port: Number(process.env.REDIS_PORT),
-        tls: {},
     },
     defaultJobOptions: {
         attempts: 3,
