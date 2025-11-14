@@ -41,8 +41,9 @@ class SendGridService {
     }
     sendVerification(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const prefixUrl = process.env.PREFIX_URL || "https://yourdomain.com";
+            const prefixUrl = process.env.PREFIX_URL;
             const html = (0, createEmailVerification_1.createVerificationMail)(`${user.firstname} ${user.lastname}`, `${prefixUrl}/verify-email?token=${user.verificationToken}`);
+            console.log("Verification URL:", `${process.env.PREFIX_URL}/verify-email?token=${user.verificationToken}`);
             try {
                 yield mail_1.default.send({
                     to: user.email,

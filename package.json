@@ -26,6 +26,7 @@
     "mongoose": "^8.19.2",
     "node-device-detector": "^2.2.4",
     "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
     "redis": "^5.9.0",
     "ua-parser-js": "^2.0.6",
     "winston": "^3.18.3",
@@ -37,6 +38,7 @@
     "@types/express-session": "^1.18.2",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/passport": "^1.0.17",
+    "@types/passport-local": "^1.0.38",
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.10",
     "typescript": "^5.9.3"

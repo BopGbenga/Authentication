@@ -65,6 +65,9 @@ const userSchema = new mongoose_1.default.Schema({
         default: null,
         required: false,
     },
+    verificationToken: {
+        type: String,
+    },
 }, { timestamps: true });
 userSchema.statics.login = function login(email, password) {
     return __awaiter(this, void 0, void 0, function* () {

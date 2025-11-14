@@ -34,6 +34,7 @@ sendEmailQueue.on("error", (error) => {
 
 sendEmailQueue.process(async (job, done) => {
   const { user, agent, date, ip, actionLink } = job.data;
+
   try {
     if (!agent) {
       console.log(`sending user verification mail to ${user.email}`);
@@ -42,25 +43,35 @@ sendEmailQueue.process(async (job, done) => {
     } else {
       console.log(`sending suspicious login mail to ${user.email}`);
       const { device, os, client } = agent;
+
       const ipInfo: any = {
-        model: device.model || os.name,
-        ip: ip,
-        client: `${client.name} ${client.version}`,
-        date: date,
+        ip: ip || "Unknown",
+        city: undefined,
+        region: undefined,
+        country: undefined,
       };
 
-      try {
-        const { data } = await ipAPIAgent.get(`${ip}/json/`);
-        if (data?.country_name) {
-          ipInfo.country = data.country_name;
+      if (ip && ip !== "Unknown" && ip !== "::1" && !ip.includes("127.0.0.1")) {
+        try {
+          const { data } = await ipAPIAgent.get(`${ip}/json/`);
+          console.log("IP API response:", data);
+
+          if (data?.city) {
+            ipInfo.city = data.city;
+          }
+          if (data?.region) {
+            ipInfo.region = data.region;
+          }
+          if (data?.country_name) {
+            ipInfo.country = data.country_name;
+          }
+        } catch (error) {
+          console.log("Failed to fetch IP data:", error);
         }
-        if (data?.org) {
-          ipInfo.org = data.org;
-        }
-      } catch (error) {
-        console.log("Failed to fetch IP data:", error);
       }
+
       const link = actionLink || `${process.env.PREFIX_URL}/security`;
+
       await SendGrid.sendSuspiciousLogin(user, ipInfo, link);
       console.log(`sent suspicious login mail to ${user.email}`);
     }

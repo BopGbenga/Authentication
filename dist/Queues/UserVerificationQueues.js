@@ -55,22 +55,28 @@ sendEmailQueue.process((job, done) => __awaiter(void 0, void 0, void 0, function
             console.log(`sending suspicious login mail to ${user.email}`);
             const { device, os, client } = agent;
             const ipInfo = {
-                model: device.model || os.name,
-                ip: ip,
-                client: `${client.name} ${client.version}`,
-                date: date,
+                ip: ip || "Unknown",
+                city: undefined,
+                region: undefined,
+                country: undefined,
             };
-            try {
-                const { data } = yield ipAPIAgent.get(`${ip}/json/`);
-                if (data === null || data === void 0 ? void 0 : data.country_name) {
-                    ipInfo.country = data.country_name;
+            if (ip && ip !== "Unknown" && ip !== "::1" && !ip.includes("127.0.0.1")) {
+                try {
+                    const { data } = yield ipAPIAgent.get(`${ip}/json/`);
+                    console.log("IP API response:", data);
+                    if (data === null || data === void 0 ? void 0 : data.city) {
+                        ipInfo.city = data.city;
+                    }
+                    if (data === null || data === void 0 ? void 0 : data.region) {
+                        ipInfo.region = data.region;
+                    }
+                    if (data === null || data === void 0 ? void 0 : data.country_name) {
+                        ipInfo.country = data.country_name;
+                    }
                 }
-                if (data === null || data === void 0 ? void 0 : data.org) {
-                    ipInfo.org = data.org;
+                catch (error) {
+                    console.log("Failed to fetch IP data:", error);
                 }
-            }
-            catch (error) {
-                console.log("Failed to fetch IP data:", error);
             }
             const link = actionLink || `${process.env.PREFIX_URL}/security`;
             yield sendGrid_1.SendGrid.sendSuspiciousLogin(user, ipInfo, link);

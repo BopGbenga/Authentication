@@ -49,11 +49,15 @@ class SendGridService {
     }
   }
   async sendVerification(user: User) {
-    const prefixUrl = process.env.PREFIX_URL || "https://yourdomain.com";
+    const prefixUrl = process.env.PREFIX_URL;
 
     const html = createVerificationMail(
       `${user.firstname} ${user.lastname}`,
       `${prefixUrl}/verify-email?token=${user.verificationToken}`
+    );
+    console.log(
+      "Verification URL:",
+      `${process.env.PREFIX_URL}/verify-email?token=${user.verificationToken}`
     );
 
     try {

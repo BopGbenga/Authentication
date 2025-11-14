@@ -45,7 +45,13 @@ export class AuthController {
         client.type || "UnknownType"
       }`;
 
-      sendEmailQueue.add({ user });
+      sendEmailQueue.add({
+        user: {
+          email: user.email,
+          firstname: user.firstname,
+          verificationToken: user.verificationToken,
+        },
+      });
 
       return res.status(201).json({
         status: "COMPLETE",
@@ -59,6 +65,85 @@ export class AuthController {
         status: "failed",
         error: "Internal server error",
       });
+    }
+  }
+  // In your AuthController
+  static async verifyEmail(req: Request, res: Response) {
+    const { token } = req.query;
+
+    try {
+      if (!token || typeof token !== "string") {
+        return res.status(400).send(`
+        <html>
+          <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>❌ Invalid Token</h1>
+            <p>The verification link is invalid.</p>
+          </body>
+        </html>
+      `);
+      }
+
+      const user = await User.findOne({ verificationToken: token });
+
+      if (!user) {
+        return res.status(404).send(`
+        <html>
+          <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>❌ Invalid or Expired Link</h1>
+            <p>This verification link is invalid or has expired.</p>
+          </body>
+        </html>
+      `);
+      }
+
+      if (user.isVerified) {
+        return res.status(200).send(`
+        <html>
+          <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>✅ Already Verified</h1>
+            <p>Your email has already been verified.</p>
+            <a href="${
+              process.env.FRONTEND_URL || process.env.PREFIX_URL
+            }/login" 
+               style="display: inline-block; margin-top: 20px; padding: 12px 24px; 
+                      background-color: #4CAF50; color: white; text-decoration: none; 
+                      border-radius: 5px;">
+              Go to Login
+            </a>
+          </body>
+        </html>
+      `);
+      }
+
+      // Verify the user
+      user.isVerified = true;
+      user.verificationToken = undefined;
+      await user.save();
+
+      return res.status(200).send(`
+      <html>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h1>✅ Email Verified Successfully!</h1>
+          <p>Your email has been verified. You can now log in to your account.</p>
+          <a href="${process.env.FRONTEND_URL || process.env.PREFIX_URL}/login" 
+             style="display: inline-block; margin-top: 20px; padding: 12px 24px; 
+                    background-color: #4CAF50; color: white; text-decoration: none; 
+                    border-radius: 5px;">
+            Go to Login
+          </a>
+        </body>
+      </html>
+    `);
+    } catch (error: any) {
+      console.error("Verification error:", error.message);
+      return res.status(500).send(`
+      <html>
+        <body style="font-family: Arial; text-align: center; padding: 50px;">
+          <h1>❌ Error</h1>
+          <p>Something went wrong. Please try again later.</p>
+        </body>
+      </html>
+    `);
     }
   }
 

@@ -1,11 +1,17 @@
-// utils/mailTemplates.ts
-
 export function createSuspiciousLoginMail(
   userFullName: string,
   ipInfo: { ip: string; city?: string; region?: string; country?: string },
   dateTime: string,
   actionLink: string
 ): string {
+  // Build location string without extra commas
+  const locationParts = [];
+  if (ipInfo.city) locationParts.push(ipInfo.city);
+  if (ipInfo.region) locationParts.push(ipInfo.region);
+  if (ipInfo.country) locationParts.push(ipInfo.country);
+  const location =
+    locationParts.length > 0 ? locationParts.join(", ") : "Unknown";
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -45,13 +51,11 @@ export function createSuspiciousLoginMail(
     </head>
     <body>
       <div class="container">
-        <h2>Hello ${userFullName},</h2>
+        <h2>Hello ${userFullName || "User"},</h2>
         <p>We detected a login to your account that seems unusual:</p>
         <ul>
-          <li><strong>IP Address:</strong> ${ipInfo.ip}</li>
-          <li><strong>Location:</strong> ${ipInfo.city || "Unknown"}, ${
-    ipInfo.region || ""
-  }, ${ipInfo.country || ""}</li>
+          <li><strong>IP Address:</strong> ${ipInfo.ip || "Unknown"}</li>
+          <li><strong>Location:</strong> ${location}</li>
           <li><strong>Date/Time:</strong> ${dateTime}</li>
         </ul>
         <p>If this was you, no action is needed. If this wasn't you, please secure your account immediately by clicking the button below:</p>

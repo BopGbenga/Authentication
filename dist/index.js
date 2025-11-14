@@ -13,15 +13,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const session = require("express-session");
 const dotenv_1 = __importDefault(require("dotenv"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const databse_1 = require("./config/databse");
 const authRoute_1 = __importDefault(require("./routes/authRoute"));
+require("./config/passport");
+const passport = require("passport");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 app.use(body_parser_1.default.json());
-app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 2000;
+if (!process.env.SESSION_SECRET) {
+    throw new Error("SESSION_SECRET environment variable is required!");
+}
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+    },
+}));
+app.use(passport.initialize());
+app.use(passport.session());
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         yield (0, databse_1.connectDB)();

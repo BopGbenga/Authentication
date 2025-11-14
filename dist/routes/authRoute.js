@@ -12,4 +12,5 @@ router.post("/signup", validationMiddleware_1.validateUser, authController_1.Aut
 router.post("/login", authMiddleware_1.login);
 router.post("/resetPasword", authController_1.AuthController.updatePassword);
 router.post("/verify/:userID", authController_1.AuthController.changePasswordMail);
+router.get("/verify-email", authController_1.AuthController.verifyEmail);
 exports.default = router;
