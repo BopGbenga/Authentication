@@ -17,6 +17,11 @@ async function main() {
   await connectDB();
 }
 app.use(router);
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello world");
+});
+
 app
   .listen(PORT, () => {
     console.log(`server is running on ${PORT}`);

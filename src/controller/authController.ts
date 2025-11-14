@@ -11,33 +11,43 @@ import crypto from "crypto";
 export class AuthController {
   static async signup(req: Request, res: Response) {
     const { firstname, lastname, email, password } = req.body;
-    const userAgent = req.header("x-ota-useragent");
+    const userAgent = req.headers["user-agent"] as string;
+
     try {
       if (!userAgent) {
-        res.status(403).json({ error: "forbidden" });
-        return;
+        return res.status(403).json({ error: "forbidden" });
       }
-      if (!firstname || typeof firstname !== "string") {
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
         res.status(400).json({
-          status: "failed",
-          error: "please enter your first name",
+          message: "User already exist",
         });
         return;
       }
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+
       const user = await User.create({
         firstname: firstname.trim(),
         lastname: lastname.trim(),
         email: email.trim().toLowerCase(),
         password: await hashPassword(password),
+        verificationToken,
         trustedDevices: [],
       });
+
       const agent = detector.detect(userAgent);
       const { device, os, client } = agent;
-      const trustedDevices = `${device.model || os.name}-${client.name}/${
-        client.version
-      }-${client.type}-`;
+
+      const trustedDevices = `${device.model || "UnknownDevice"}-${
+        os.name || "UnknownOS"
+      }/${client.name || "UnknownBrowser"}-${client.version || "0.0"}-${
+        client.type || "UnknownType"
+      }`;
+
       sendEmailQueue.add({ user });
-      res.status(201).json({
+
+      return res.status(201).json({
         status: "COMPLETE",
         message: "sign up successful",
         user: user.email,
@@ -45,7 +55,7 @@ export class AuthController {
       });
     } catch (error: any) {
       console.log(error.message);
-      res.status(500).json({
+      return res.status(500).json({
         status: "failed",
         error: "Internal server error",
       });

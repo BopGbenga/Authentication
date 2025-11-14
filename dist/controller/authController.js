@@ -24,31 +24,32 @@ class AuthController {
     static signup(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { firstname, lastname, email, password } = req.body;
-            const userAgent = req.header("x-ota-useragent");
+            const userAgent = req.headers["user-agent"];
             try {
                 if (!userAgent) {
-                    res.status(403).json({ error: "forbidden" });
-                    return;
+                    return res.status(403).json({ error: "forbidden" });
                 }
-                if (!firstname || typeof firstname !== "string") {
+                const existingUser = yield user_1.User.findOne({ email });
+                if (existingUser) {
                     res.status(400).json({
-                        status: "failed",
-                        error: "please enter your first name",
+                        message: "User already exist",
                     });
                     return;
                 }
+                const verificationToken = crypto_1.default.randomBytes(32).toString("hex");
                 const user = yield user_1.User.create({
                     firstname: firstname.trim(),
                     lastname: lastname.trim(),
                     email: email.trim().toLowerCase(),
                     password: yield (0, handler_1.hashPassword)(password),
+                    verificationToken,
                     trustedDevices: [],
                 });
                 const agent = deviceDetector_1.detector.detect(userAgent);
                 const { device, os, client } = agent;
-                const trustedDevices = `${device.model || os.name}-${client.name}/${client.version}-${client.type}-`;
+                const trustedDevices = `${device.model || "UnknownDevice"}-${os.name || "UnknownOS"}/${client.name || "UnknownBrowser"}-${client.version || "0.0"}-${client.type || "UnknownType"}`;
                 UserVerificationQueues_2.sendEmailQueue.add({ user });
-                res.status(201).json({
+                return res.status(201).json({
                     status: "COMPLETE",
                     message: "sign up successful",
                     user: user.email,
@@ -57,7 +58,7 @@ class AuthController {
             }
             catch (error) {
                 console.log(error.message);
-                res.status(500).json({
+                return res.status(500).json({
                     status: "failed",
                     error: "Internal server error",
                 });
